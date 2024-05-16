@@ -1,12 +1,14 @@
 #include "laser_system.hpp"
+#include "resources.hpp"
 
 float calculate_intensity(float initial, float angle) {
     float rad = angle * PI / 180;
     return initial * powf(cosf(rad), 2);
 }
 
-
 bool do_spin(bool *enabled, Vector2 position, Vector2 mouse, float *theta) {
+    Font font = get_font();
+
     float base_radius = 16;
     float dot_radius = 8;
     float rad = *theta * PI/180;
@@ -46,6 +48,7 @@ bool do_spin(bool *enabled, Vector2 position, Vector2 mouse, float *theta) {
 
     DrawCircle(position.x, position.y, base_radius, DARKGRAY);
     DrawCircle(dp.x, dp.y, dot_radius, dot_color);
+    DrawTextEx(font, (std::to_string((int)*theta) + "°").c_str(), { dp.x, dp.y - 30 }, 24, 2, WHITE);
 
     return interact > 0 && *enabled == false; // update was made if true
 }
@@ -59,9 +62,19 @@ LaserSystem::LaserSystem(LaserSource *source, LaserDetector *detector, float ini
 }
 
 void LaserSystem::draw() {
+    Font font = get_font();
+
+    std::vector<float> intensities;
     for (Laser &l : this->lasers) {
         l.draw();
+
+        std::string str_intensity = std::string("I: ") + std::to_string(l.intensity);
+        int str_length = (str_intensity.length() * 24) / 2;
+        intensities.push_back(l.intensity);
     }
+
+    this->source->draw();
+    this->detector->draw();
 
     Vector2 window_size;
     window_size.x = GetScreenWidth();
@@ -70,6 +83,10 @@ void LaserSystem::draw() {
     Vector2 mp = GetMousePosition();
     mp.x -= window_size.x / 2;
     mp.y -= window_size.y / 2;
+
+    std::string str;
+    Vector2 position;
+    int idx = 1;
     for (Polarizer *p : this->polarizers) {
         p->draw();
 
@@ -77,14 +94,21 @@ void LaserSystem::draw() {
         offset.x += 25;
         offset.y -= 100;
 
+        str = "I: " + std::to_string(intensities[idx]);
+        position = p->get_position();
+        position.y += 150;
+        DrawTextEx(font, str.c_str(), position, 18, 2, WHITE);
         if (do_spin(&p->ui_enabled, offset, mp, &p->rotation)) {
              reset();
         }
+
+        idx++;
     }
 
-    this->source->draw();
-    this->detector->draw();
-
+    str = "I: " + std::to_string(intensities[0]);
+    position = source->get_position();
+    position.y += 150;
+    DrawTextEx(font, str.c_str(), position, 18, 2, WHITE); // bad
 }
 
 int LaserSystem::get_polarizer_count() {
@@ -139,7 +163,6 @@ void LaserSystem::integrate(float dt) {
             }
         }
 
-        // Has laser hit the detector?
         Hitbox dhit = detector->get_hitbox();
         if (is_hit(&lhit, &dhit)) {
             l.has_hit = true;

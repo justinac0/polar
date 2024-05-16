@@ -16,7 +16,6 @@ void Laser::draw() {
 
     Hitbox hitbox = get_hitbox();
     DrawRectangleV(hitbox.position, hitbox.size, {0, 255, 0, 100});
-    DrawText(std::to_string(intensity).c_str(), start.x, hitbox.position.y-50, 14, WHITE);
 }
 
 void Laser::integrate(float dt) {
