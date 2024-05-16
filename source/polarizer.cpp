@@ -2,6 +2,7 @@
 
 Polarizer::Polarizer(Vector2 position, float rotation) : Component(position, COMPONENT_SIZE) {
     this->rotation = rotation;
+    this->ui_enabled = false;
 }
 
 void Polarizer::draw() {
@@ -20,4 +21,9 @@ Hitbox Polarizer::get_hitbox() {
     hitbox.position = this->position;
 
     return hitbox;
+}
+
+
+Vector2 Polarizer::get_position() {
+    return this->position;
 }

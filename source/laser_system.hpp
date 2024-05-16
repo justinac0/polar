@@ -20,6 +20,7 @@ class LaserSystem {
         void draw();
 
         void add_polarizer(Polarizer *polar);
+        int get_polarizer_count();
         void reset();
         void integrate(float dt);
 

@@ -12,5 +12,7 @@ class Polarizer : Component {
 
         void set_rotation(float angle);
         Hitbox get_hitbox();
+        Vector2 get_position();
+        bool ui_enabled;
         float rotation;
 };

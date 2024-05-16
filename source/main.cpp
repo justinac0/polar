@@ -7,52 +7,6 @@
 #include "laser_detector.hpp"
 #include "laser_system.hpp"
 
-bool do_spin(bool *enabled, Vector2 position, Vector2 mouse, float *theta) {
-    float base_radius = 16;
-    float dot_radius = 8;
-    float rad = *theta * PI/180;
-
-    Vector2 dp;
-    dp.x = cos(rad) * base_radius + position.x;
-    dp.y = -sin(rad) * base_radius + position.y;
-
-    DrawText(std::to_string((int)(*theta) % 360).c_str(), position.x, position.y - 50, 14, WHITE);
-
-    Hitbox hdot;
-    hdot.position = position;
-    hdot.size.x = base_radius;
-    hdot.size.y = base_radius;
-
-    Hitbox mdot;
-    mdot.position = mouse;
-    mdot.size = {base_radius,base_radius};
-
-    char interact = 0;
-    Color dot_color = DARKGRAY;
-    if (is_hit(&hdot, &mdot) && (IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
-        *enabled = !(*enabled);
-        interact++;
-    }
-
-    if (*enabled) {
-        dot_color = GREEN;
-        if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
-            *theta += 5;
-        }
-
-        if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
-            *theta -= 5;
-        }
-
-        DrawCircle(position.x, position.y, base_radius + 4, DARKGREEN);
-    }
-
-    DrawCircle(position.x, position.y, base_radius, GRAY);
-    DrawCircle(dp.x, dp.y, dot_radius, dot_color);
-
-    return interact > 0 && *enabled == false; // update was made if true
-}
-
 int main() {
     InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE);
     Vector2 offset;
@@ -93,9 +47,11 @@ int main() {
 #endif
 
     float t = 0.0;
-    float dt = 1 / 1.;
+    float dt = 1;
 
     float current_time = GetTime();
+
+    int pcount = system.get_polarizer_count();
 
     while (!WindowShouldClose()) {
         float new_time = GetTime();
@@ -115,34 +71,18 @@ int main() {
             system.reset();
 
         BeginDrawing();
-        ClearBackground(BLACK);
+        ClearBackground({0, 100, 255, 230});
+        DrawRectangle(60, 60, WINDOW_WIDTH - 120, WINDOW_HEIGHT - 120, {0, 0, 0, 150}); // transparent panel
+
+        if (pcount == 1) {
+            DrawText("System: 2 Polar", 10, 10, 32, WHITE);
+        } else if (pcount == 2) {
+            DrawText("System: 3 Polar", 10, 10, 32, WHITE);
+        } else {
+            // ...
+        }
 
         BeginMode2D(camera);
-        Vector2 mp = GetMousePosition();
-        mp.x -= WINDOW_WIDTH / 2;
-        mp.y -= WINDOW_HEIGHT / 2;
-
-        bool a = false;
-        bool b = false;
-
-#if POLAR_2
-        a = do_spin(&t0, {0, -100}, mp, &theta0);
-        if (a) {
-             polar1.set_rotation(theta0);
-             system.reset();
-        }
-#endif
-
-#if POLAR_3
-        a = do_spin(&t0, {0, -100}, mp, &theta0);
-        b = do_spin(&t1, {100, -100}, mp, &theta1);
-        if (a | b) {
-             polar1.set_rotation(theta0);
-             polar2.set_rotation(theta1);
-             system.reset();
-        }
-#endif
-
         system.draw();
         EndMode2D();
 
