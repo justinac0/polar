@@ -48,7 +48,7 @@ int main() {
 #endif
 
     float t = 0.0;
-    float dt = 1. / 120.;
+    float dt = 1.;
 
     float current_time = GetTime();
 

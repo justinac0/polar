@@ -1,5 +1,6 @@
 #include "laser_system.hpp"
 #include "resources.hpp"
+#include <raylib.h>
 
 float calculate_intensity(float initial, float angle) {
     float rad = angle * PI / 180;
@@ -28,27 +29,56 @@ bool do_spin(bool *enabled, Vector2 position, Vector2 mouse, float *theta) {
 
     char interact = 0;
     Color dot_color = DARKGREEN;
-    if (is_hit(&hdot, &mdot) && (IsKeyPressed(KEY_SPACE) || IsMouseButtonPressed(MOUSE_LEFT_BUTTON))) {
+    if (is_hit(&hdot, &mdot) && IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
         *enabled = !(*enabled);
+        interact++;
+    } else if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON) && *enabled) {
+        *enabled = false;
         interact++;
     }
 
     if (*enabled) {
         dot_color = GREEN;
-        if (IsKeyPressed(KEY_W) || IsKeyPressed(KEY_UP)) {
-            *theta += 5;
+
+        // line to mouse
+        Vector2 mpl;
+        mpl.x = mdot.position.x;
+        mpl.y = mdot.position.y;
+
+        float mag = sqrtf(mpl.x*mpl.x + mpl.y*mpl.y);
+
+        Vector2 fixed;
+        fixed.x = position.x + base_radius;
+        fixed.y = position.y;
+
+        Vector2 a = mpl;
+        a.x -= position.x;
+        a.y -= position.y;
+
+        Vector2 b = fixed;
+        b.x -= position.x;
+        b.y -= position.y;
+
+        float dot = a.x * b.x + a.y * b.y;
+        float mag1 = sqrtf(a.x*a.x + a.y*a.y);
+        float mag2 = sqrtf(b.x*b.x + b.y*b.y);
+        float ans = dot/(mag1*mag2);
+        float angle = acosf(ans) * 180/PI;
+
+        bool ayp = sin(a.y/mag1) > 0;
+
+        if (ayp) {
+            angle = 360 - angle;
         }
 
-        if (IsKeyPressed(KEY_S) || IsKeyPressed(KEY_DOWN)) {
-            *theta -= 5;
-        }
+        *theta = angle;
 
         DrawCircle(position.x, position.y, base_radius + 4, DARKGREEN);
     }
 
     DrawCircle(position.x, position.y, base_radius, DARKGRAY);
     DrawCircle(dp.x, dp.y, dot_radius, dot_color);
-    DrawTextEx(font, (std::to_string((int)*theta) + "°").c_str(), { dp.x, dp.y - 30 }, 24, 2, WHITE);
+    DrawTextEx(font, (std::to_string((int)*theta) + "°").c_str(), { dp.x, dp.y - 30 }, 24, 2, WHITE);   
 
     return interact > 0 && *enabled == false; // update was made if true
 }
