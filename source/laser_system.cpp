@@ -124,7 +124,7 @@ void LaserSystem::draw() {
         offset.x += 25;
         offset.y -= 100;
 
-        str = "I: " + std::to_string(intensities[idx]);
+        str = "I" + std::to_string(idx + 1) + ": " + std::to_string(intensities[idx]);
         position = p->get_position();
         position.y += 150;
         DrawTextEx(font, str.c_str(), position, 18, 2, WHITE);
@@ -142,7 +142,7 @@ void LaserSystem::draw() {
         idx++;
     }
 
-    str = "I: " + std::to_string(intensities[0]);
+    str = "I1: " + std::to_string(intensities[0]);
     position = source->get_position();
     position.y += 150;
     DrawTextEx(font, str.c_str(), position, 18, 2, WHITE); // bad
