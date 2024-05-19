@@ -10,7 +10,7 @@ float calculate_intensity(float initial, float angle) {
 bool do_spin(bool *enabled, Vector2 position, Vector2 mouse, float *theta) {
     Font font = get_font();
 
-    float base_radius = 16;
+    float base_radius = 32;
     float dot_radius = 8;
     float rad = *theta * PI/180;
 
