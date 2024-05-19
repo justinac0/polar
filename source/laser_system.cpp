@@ -128,10 +128,17 @@ void LaserSystem::draw() {
         position = p->get_position();
         position.y += 150;
         DrawTextEx(font, str.c_str(), position, 18, 2, WHITE);
-        if (do_spin(&p->ui_enabled, offset, mp, &p->rotation)) {
-             reset();
-        }
 
+#if REALTIME_UPDATE
+        float old_theta = p->rotation;
+#endif
+        if (do_spin(&p->ui_enabled, offset, mp, &p->rotation))
+             reset();
+
+#if REALTIME_UPDATE
+        if (old_theta != p->rotation)
+            reset();
+#endif
         idx++;
     }
 
