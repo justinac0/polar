@@ -71,7 +71,7 @@ bool do_spin(bool *enabled, Vector2 position, Vector2 mouse, float *theta) {
             angle = 360 - angle;
         }
 
-        *theta = angle;
+        *theta = (int)angle;
 
         DrawCircle(position.x, position.y, base_radius + 4, DARKGREEN);
     }
